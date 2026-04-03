@@ -2,100 +2,208 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Roll Dadu Keuntungan</title>
 
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        text-align: center;
-        background: linear-gradient(135deg, #1e1e2f, #2a2a40);
-        color: white;
-    }
+body {
+    margin:0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg,#0f172a,#1e293b);
+    color:white;
+    text-align:center;
+}
 
-    h1 {
-        margin-top: 30px;
-        font-size: 28px;
-    }
+.container {
+    max-width:400px;
+    margin:auto;
+    padding:20px;
+}
 
-    .dice {
-        font-size: 100px;
-        margin: 20px;
-        transition: transform 0.3s;
-    }
+h1 {
+    font-size:26px;
+    margin-top:20px;
+}
 
-    button {
-        padding: 15px 30px;
-        font-size: 18px;
-        background: gold;
-        border: none;
-        border-radius: 10px;
-        cursor: pointer;
-        font-weight: bold;
-    }
+.banner {
+    background: linear-gradient(90deg,#facc15,#f97316);
+    padding:15px;
+    border-radius:12px;
+    font-weight:bold;
+    color:black;
+    margin-bottom:20px;
+}
 
-    button:hover {
-        background: orange;
-    }
+input {
+    width:100%;
+    padding:12px;
+    border-radius:10px;
+    border:none;
+    margin-bottom:10px;
+    text-align:center;
+    font-size:16px;
+}
 
-    .result {
-        margin-top: 20px;
-        font-size: 24px;
-        font-weight: bold;
-    }
+.dice-wrap{
+    display:flex;
+    justify-content:center;
+    gap:20px;
+}
+
+.dice {
+    font-size:70px;
+    margin:10px 0;
+}
+
+button {
+    width:100%;
+    padding:15px;
+    font-size:18px;
+    border:none;
+    border-radius:10px;
+    background:#22c55e;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:hover {
+    background:#16a34a;
+}
+
+.result {
+    margin-top:20px;
+    font-size:22px;
+    font-weight:bold;
+}
+
+.claim {
+    margin-top:15px;
+    background:#ef4444;
+}
+
+.small {
+    font-size:12px;
+    opacity:0.7;
+    margin-top:20px;
+}
+
+/* popup fake */
+.popup {
+    position:fixed;
+    bottom:20px;
+    left:50%;
+    transform:translateX(-50%);
+    background:#22c55e;
+    color:white;
+    padding:10px 15px;
+    border-radius:10px;
+    font-size:14px;
+    display:none;
+    box-shadow:0 5px 15px rgba(0,0,0,0.3);
+}
 </style>
 </head>
 
 <body>
 
-<h1>🎲 ROLL DADU KEUNTUNGAN 🎲</h1>
+<div class="container">
 
-<div class="dice" id="dice">🎲</div>
+<div class="banner">
+🎲 ROLL DADU & MENANGKAN HADIAH HINGGA 20RB!
+</div>
+
+<h1>ROLL 2 DADU KEUNTUNGAN</h1>
+
+<input type="text" id="kode" placeholder="Masukkan kode disini" />
+
+<div class="dice-wrap">
+    <div class="dice" id="dice1">🎲</div>
+    <div class="dice" id="dice2">🎲</div>
+</div>
 
 <button onclick="rollDice()">ROLL SEKARANG</button>
 
 <div class="result" id="result"></div>
 
+<button class="claim" onclick="claimReward()">KLAIM HADIAH</button>
+
+<div class="small">
+*Gunakan kode untuk bermain
+</div>
+
+</div>
+
+<div class="popup" id="popup"></div>
+
 <script>
+let hadiahGlobal = "";
+const kodeValid = "SPIN123"KLAIM123"FREE12";
+
 function rollDice() {
-    const dice = document.getElementById("dice");
+    const inputKode = document.getElementById("kode").value;
+
+    if(inputKode !== kodeValid) {
+        alert("Kode salah atau belum diisi!");
+        return;
+    }
+
+    if(localStorage.getItem("played")) {
+        alert("Kamu sudah bermain hari ini!");
+        return;
+    }
+
+    const dice1 = document.getElementById("dice1");
+    const dice2 = document.getElementById("dice2");
     const result = document.getElementById("result");
 
-    // animasi
-    dice.style.transform = "rotate(360deg)";
-    
     setTimeout(() => {
-        dice.style.transform = "rotate(0deg)";
-        
-        let roll = Math.floor(Math.random() * 6) + 1;
+        let d1 = Math.floor(Math.random()*6)+1;
+        let d2 = Math.floor(Math.random()*6)+1;
+        let total = d1 + d2;
 
-        let hadiah = "";
+        if(total <= 4) hadiahGlobal = "💸 5 RB";
+        else if(total <= 7) hadiahGlobal = "💰 10 RB";
+        else if(total <= 10) hadiahGlobal = "🎁 FREE SPIN";
+        else if(total == 11) hadiahGlobal = "⚡ SCATTER";
+        else hadiahGlobal = "🔥 20 RB";
 
-        switch(roll) {
-            case 1:
-                hadiah = "💸 5 RB";
-                break;
-            case 2:
-                hadiah = "💰 10 RB";
-                break;
-            case 3:
-                hadiah = "🔥 20 RB";
-                break;
-            case 4:
-                hadiah = "🎁 FREE SPIN";
-                break;
-            case 5:
-                hadiah = "⚡ SCATTER";
-                break;
-            case 6:
-                hadiah = "💎 BONUS BESAR!";
-                break;
-        }
+        dice1.innerHTML = d1;
+        dice2.innerHTML = d2;
+        result.innerHTML = "Total: "+total+" | Hadiah: " + hadiahGlobal;
 
-        dice.innerHTML = roll;
-        result.innerHTML = "Kamu mendapatkan: " + hadiah;
+        localStorage.setItem("played", true);
 
-    }, 300);
+    },400);
 }
+
+function claimReward(){
+    if(hadiahGlobal === ""){
+        alert("Roll dulu ya!");
+        return;
+    }
+
+    alert("Login / Deposit untuk klaim hadiah!");
+}
+
+/* fake popup winner */
+const names = ["Andi","Budi","Siti","Rina","Dika","Agus","Rizky"];
+const rewards = ["20 RB","10 RB","SCATTER","FREE SPIN"];
+
+function showPopup(){
+    const popup = document.getElementById("popup");
+    let name = names[Math.floor(Math.random()*names.length)];
+    let reward = rewards[Math.floor(Math.random()*rewards.length)];
+
+    popup.innerHTML = "🎉 "+name+" baru saja menang "+reward+"!";
+    popup.style.display = "block";
+
+    setTimeout(()=>{
+        popup.style.display = "none";
+    },3000);
+}
+
+setInterval(showPopup, 5000);
 </script>
 
 </body>
