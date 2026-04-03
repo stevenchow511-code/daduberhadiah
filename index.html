@@ -20,11 +20,6 @@ body {
     padding:20px;
 }
 
-h1 {
-    font-size:26px;
-    margin-top:20px;
-}
-
 .banner {
     background: linear-gradient(90deg,#facc15,#f97316);
     padding:15px;
@@ -41,7 +36,6 @@ input {
     border:none;
     margin-bottom:10px;
     text-align:center;
-    font-size:16px;
 }
 
 .dice-wrap{
@@ -52,7 +46,20 @@ input {
 
 .dice {
     font-size:70px;
-    margin:10px 0;
+    margin:20px 0;
+    transition: transform 0.2s;
+}
+
+.dice.rolling {
+    animation: shake 0.3s infinite;
+}
+
+@keyframes shake {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(10deg); }
+    50% { transform: rotate(-10deg); }
+    75% { transform: rotate(8deg); }
+    100% { transform: rotate(0deg); }
 }
 
 button {
@@ -67,40 +74,38 @@ button {
     cursor:pointer;
 }
 
-button:hover {
-    background:#16a34a;
-}
-
 .result {
     margin-top:20px;
-    font-size:22px;
+    font-size:24px;
     font-weight:bold;
+    min-height:30px;
 }
 
-.claim {
-    margin-top:15px;
-    background:#ef4444;
+/* ANIMASI HADIAH */
+.result.show {
+    animation: pop 0.4s ease, glow 1s ease infinite alternate;
 }
 
-.small {
-    font-size:12px;
-    opacity:0.7;
-    margin-top:20px;
+@keyframes pop {
+    0% {transform: scale(0.5); opacity:0;}
+    100% {transform: scale(1); opacity:1;}
 }
 
-/* popup fake */
+@keyframes glow {
+    from {text-shadow:0 0 5px #22c55e;}
+    to {text-shadow:0 0 20px #22c55e, 0 0 30px #22c55e;}
+}
+
 .popup {
     position:fixed;
     bottom:20px;
     left:50%;
     transform:translateX(-50%);
     background:#22c55e;
-    color:white;
     padding:10px 15px;
     border-radius:10px;
-    font-size:14px;
     display:none;
-    box-shadow:0 5px 15px rgba(0,0,0,0.3);
+    z-index:9999;
 }
 </style>
 </head>
@@ -109,13 +114,11 @@ button:hover {
 
 <div class="container">
 
-<div class="banner">
-🎲 ROLL DADU & MENANGKAN HADIAH HINGGA 20RB!
-</div>
+<div class="banner">🎲 ROLL DADU & MENANGKAN HADIAH 🎁</div>
 
-<h1>ROLL 2 DADU KEUNTUNGAN</h1>
+<h2>ROLL 2 DADU</h2>
 
-<input type="text" id="kode" placeholder="Masukkan kode disini" />
+<input type="text" id="kode" placeholder="Masukkan kode" />
 
 <div class="dice-wrap">
     <div class="dice" id="dice1">🎲</div>
@@ -126,76 +129,96 @@ button:hover {
 
 <div class="result" id="result"></div>
 
-<button class="claim" onclick="claimReward()">KLAIM HADIAH</button>
-
-<div class="small">
-*Gunakan kode untuk bermain
-</div>
-
 </div>
 
 <div class="popup" id="popup"></div>
 
 <script>
+// SOUND EFFECT
+const rollSound = new Audio("https://www.soundjay.com/misc/sounds/dice-roll-1.mp3");
+const winSound = new Audio("https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3");
 let hadiahGlobal = "";
-const kodeValid = "SPIN123"KLAIM123"FREE12";
+const kodeValid = "SPIN123";
+
+function animateText(element, text) {
+    element.innerHTML = "";
+    let i = 0;
+    let typing = setInterval(()=>{
+        element.innerHTML += text.charAt(i);
+        i++;
+        if(i >= text.length) clearInterval(typing);
+    }, 30);
+}
 
 function rollDice() {
-    const inputKode = document.getElementById("kode").value;
-
-    if(inputKode !== kodeValid) {
-        alert("Kode salah atau belum diisi!");
-        return;
-    }
-
-    if(localStorage.getItem("played")) {
-        alert("Kamu sudah bermain hari ini!");
+    rollSound.currentTime = 0;
+    rollSound.play();
+    const kode = document.getElementById("kode").value;
+    if(kode !== kodeValid){
+        alert("Kode salah!");
         return;
     }
 
     const dice1 = document.getElementById("dice1");
     const dice2 = document.getElementById("dice2");
+    dice1.classList.add("rolling");
+    dice2.classList.add("rolling");
+    const dice2 = document.getElementById("dice2");
     const result = document.getElementById("result");
 
-    setTimeout(() => {
-        let d1 = Math.floor(Math.random()*6)+1;
-        let d2 = Math.floor(Math.random()*6)+1;
-        let total = d1 + d2;
+    result.classList.remove("show");
+    result.innerHTML = "";
 
-        if(total <= 4) hadiahGlobal = "💸 5 RB";
-        else if(total <= 7) hadiahGlobal = "💰 10 RB";
-        else if(total <= 10) hadiahGlobal = "🎁 FREE SPIN";
-        else if(total == 11) hadiahGlobal = "⚡ SCATTER";
-        else hadiahGlobal = "🔥 20 RB";
+    let count = 0;
 
-        dice1.innerHTML = d1;
-        dice2.innerHTML = d2;
-        result.innerHTML = "Total: "+total+" | Hadiah: " + hadiahGlobal;
+    let anim = setInterval(()=>{
+        dice1.innerHTML = Math.floor(Math.random()*6)+1;
+        dice2.innerHTML = Math.floor(Math.random()*6)+1;
+        count++;
 
-        localStorage.setItem("played", true);
+        if(count > 10){
+            // DRAMA STOP (melambat)
+            if(count < 15) return;
+            clearInterval(anim);
 
-    },400);
+            let d1 = Math.floor(Math.random()*6)+1;
+            let d2 = Math.floor(Math.random()*6)+1;
+            let total = d1 + d2;
+
+            dice1.innerHTML = d1;
+            dice2.innerHTML = d2;
+
+            dice1.classList.remove("rolling");
+            dice2.classList.remove("rolling");
+
+            winSound.play();
+
+            if(total <= 4) hadiahGlobal = "💸 5 RB";
+            else if(total <= 7) hadiahGlobal = "💰 10 RB";
+            else if(total <= 10) hadiahGlobal = "🎁 FREE SPIN";
+            else if(total == 11) hadiahGlobal = "⚡ SCATTER";
+            else hadiahGlobal = "🔥 20 RB";
+
+            let text = "Total: "+total+" → " + hadiahGlobal;
+
+            setTimeout(()=>{
+                result.classList.add("show");
+                animateText(result, text);
+            }, 300);
+        }
+    },100);
 }
 
-function claimReward(){
-    if(hadiahGlobal === ""){
-        alert("Roll dulu ya!");
-        return;
-    }
-
-    alert("Login / Deposit untuk klaim hadiah!");
-}
-
-/* fake popup winner */
-const names = ["Andi","Budi","Siti","Rina","Dika","Agus","Rizky"];
-const rewards = ["20 RB","10 RB","SCATTER","FREE SPIN"];
+// popup fake
+const names = ["Andi","Budi","Siti","Rina"];
+const rewards = ["20 RB","10 RB","SCATTER"];
 
 function showPopup(){
     const popup = document.getElementById("popup");
     let name = names[Math.floor(Math.random()*names.length)];
     let reward = rewards[Math.floor(Math.random()*rewards.length)];
 
-    popup.innerHTML = "🎉 "+name+" baru saja menang "+reward+"!";
+    popup.innerHTML = "🎉 "+name+" menang "+reward;
     popup.style.display = "block";
 
     setTimeout(()=>{
@@ -203,7 +226,8 @@ function showPopup(){
     },3000);
 }
 
-setInterval(showPopup, 5000);
+showPopup();
+setInterval(showPopup,5000);
 </script>
 
 </body>
