@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Roll Dadu Keuntungan</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        background: linear-gradient(135deg, #1e1e2f, #2a2a40);
+        color: white;
+    }
+
+    h1 {
+        margin-top: 30px;
+        font-size: 28px;
+    }
+
+    .dice {
+        font-size: 100px;
+        margin: 20px;
+        transition: transform 0.3s;
+    }
+
+    button {
+        padding: 15px 30px;
+        font-size: 18px;
+        background: gold;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    button:hover {
+        background: orange;
+    }
+
+    .result {
+        margin-top: 20px;
+        font-size: 24px;
+        font-weight: bold;
+    }
+</style>
+</head>
+
+<body>
+
+<h1>🎲 ROLL DADU KEUNTUNGAN 🎲</h1>
+
+<div class="dice" id="dice">🎲</div>
+
+<button onclick="rollDice()">ROLL SEKARANG</button>
+
+<div class="result" id="result"></div>
+
+<script>
+function rollDice() {
+    const dice = document.getElementById("dice");
+    const result = document.getElementById("result");
+
+    // animasi
+    dice.style.transform = "rotate(360deg)";
+    
+    setTimeout(() => {
+        dice.style.transform = "rotate(0deg)";
+        
+        let roll = Math.floor(Math.random() * 6) + 1;
+
+        let hadiah = "";
+
+        switch(roll) {
+            case 1:
+                hadiah = "💸 5 RB";
+                break;
+            case 2:
+                hadiah = "💰 10 RB";
+                break;
+            case 3:
+                hadiah = "🔥 20 RB";
+                break;
+            case 4:
+                hadiah = "🎁 FREE SPIN";
+                break;
+            case 5:
+                hadiah = "⚡ SCATTER";
+                break;
+            case 6:
+                hadiah = "💎 BONUS BESAR!";
+                break;
+        }
+
+        dice.innerHTML = roll;
+        result.innerHTML = "Kamu mendapatkan: " + hadiah;
+
+    }, 300);
+}
+</script>
+
+</body>
+</html>
